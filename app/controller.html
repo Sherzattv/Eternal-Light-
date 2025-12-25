@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вечный Свет</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* === 2024 MODERN UI — DARK GLASSMORPHISM === */
+        :root {
+            --bg-primary: #0a0a0b;
+            --bg-secondary: #141416;
+            --bg-tertiary: #1c1c1f;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-tertiary: rgba(255, 255, 255, 0.4);
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --success: #22c55e;
+            --success-glow: rgba(34, 197, 94, 0.3);
+            --warning: #f59e0b;
+            --warning-glow: rgba(245, 158, 11, 0.3);
+            --error: #ef4444;
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Gradient background effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 60%, rgba(59, 130, 246, 0.08) 0%, transparent 40%);
+            animation: aurora 20s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes aurora {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            50% {
+                transform: translate(-5%, -5%) rotate(5deg);
+            }
+        }
+
+        /* === LAYOUT === */
+        .app {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            min-height: 100vh;
+            gap: 0;
+        }
+
+        /* === SIDEBAR === */
+        .sidebar {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(20px);
+        }
+
+        .sidebar-header {
+            padding: 28px 24px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 8px 32px var(--accent-glow);
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-section {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-tertiary);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .history-item {
+            padding: 14px 16px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateX(4px);
+        }
+
+        .history-ref {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .history-snippet {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* === MAIN CONTENT === */
+        .main {
+            padding: 32px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            max-width: 1200px;
+        }
+
+        /* === SEARCH BAR (Modern) === */
+        .search-row {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .search-container {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 18px 24px;
+            padding-left: 56px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            font-family: inherit;
+            font-size: 16px;
+            color: var(--text-primary);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow), 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: var(--text-tertiary);
+        }
+
+        /* Translation Selector */
+        .translation-select {
+            padding: 14px 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s ease;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 44px;
+        }
+
+        .translation-select:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Status Pill */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .status-pill.success {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.3);
+            color: var(--success);
+        }
+
+        .status-pill.broadcasting {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: rgba(245, 158, 11, 0.3);
+            color: var(--warning);
+            animation: pulse-border 2s infinite;
+        }
+
+        .status-pill.error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: var(--error);
+        }
+
+        @keyframes pulse-border {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 var(--warning-glow);
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px transparent;
+            }
+        }
+
+        /* === BENTO CARDS === */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            flex: 1;
+        }
+
+        .bento-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bento-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+
+        .bento-card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .bento-card.large {
+            grid-column: span 2;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-tertiary);
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .verse-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .verse-text {
+            font-size: 22px;
+            line-height: 1.6;
+            font-weight: 400;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+
+        .verse-text.placeholder {
+            color: var(--text-tertiary);
+            font-style: italic;
+            font-size: 16px;
+        }
+
+        .verse-ref {
+            margin-top: 20px;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .edit-area {
+            width: 100%;
+            min-height: 150px;
+            padding: 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 18px;
+            line-height: 1.6;
+            color: var(--text-primary);
+            resize: vertical;
+            outline: none;
+            display: none;
+        }
+
+        .edit-area:focus {
+            border-color: var(--accent);
+        }
+
+        .edit-area.active {
+            display: block;
+        }
+
+        /* === BUTTONS === */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--accent-glow);
+        }
+
+        .btn-primary:disabled {
+            background: var(--bg-tertiary);
+            color: var(--text-tertiary);
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            padding: 10px 16px;
+        }
+
+        .btn-ghost:hover {
+            background: var(--glass);
+            color: var(--text-primary);
+        }
+
+        .btn-icon {
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            border-radius: var(--radius-sm);
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .btn-icon:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            transform: scale(1.05);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            box-shadow: 0 4px 16px var(--success-glow);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--success-glow);
+        }
+
+        /* === ACTION BAR (Fixed Bottom) === */
+        .action-bar {
+            display: flex;
+            gap: 12px;
+            padding: 20px 24px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(20px);
+        }
+
+        /* === MODAL === */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            width: 480px;
+            max-width: 90vw;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 15px;
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .form-range {
+            width: 100%;
+            -webkit-appearance: none;
+            background: var(--bg-primary);
+            height: 8px;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .form-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* === LOADING === */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-primary);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--glass-border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            font-size: 14px;
+            color: var(--text-tertiary);
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 1024px) {
+            .app {
+                grid-template-columns: 280px 1fr;
+            }
+
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bento-card.large {
+                grid-column: span 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                padding: 20px;
+            }
+
+            .search-row {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">✦</div>
+                    <span class="logo-text">Вечный Свет</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <span class="section-title">История</span>
+                    <button class="btn-icon" onclick="clearHistory()" title="Очистить">🗑</button>
+                </div>
+                <div id="history" class="history-list">
+                    <!-- History items -->
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <button class="btn btn-secondary" onclick="toggleSettings()" style="width: 100%;">
+                    ⚙️ Настройки экрана
+                </button>
+                <button class="btn btn-secondary" onclick="openDisplayWindow()" style="width: 100%;">
+                    🖥️ Открыть экран
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <main class="main">
+            <!-- Search Row -->
+            <div class="search-row">
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="search-input" class="search-input"
+                        placeholder="Введите ссылку на стих (Ин 3:16, Быт 1:1-3...)" autocomplete="off">
+                </div>
+                <select id="translation-select" class="translation-select">
+                    <option value="RST">Синодальный</option>
+                    <option value="NRT">НРП</option>
+                    <option value="KTB">Казахский (KTB)</option>
+                </select>
+                <div id="status" class="status-pill">⏳ Готов</div>
+            </div>
+
+            <!-- Bento Grid -->
+            <div class="bento-grid">
+                <!-- Preview Card (Large) -->
+                <div class="bento-card large">
+                    <div class="card-header">
+                        <span class="card-label">Предпросмотр</span>
+                        <div class="card-actions">
+                            <button class="btn-icon" id="btn-edit" onclick="toggleEditMode()"
+                                title="Редактировать">✏️</button>
+                            <button class="btn btn-ghost" id="btn-save" onclick="saveEdit()"
+                                style="display:none;">Сохранить</button>
+                            <button class="btn btn-ghost" id="btn-cancel" onclick="cancelEdit()"
+                                style="display:none;">Отмена</button>
+                        </div>
+                    </div>
+                    <div class="verse-content">
+                        <div id="verse-text" class="verse-text placeholder">
+                            Введите ссылку и нажмите Enter для поиска стиха...
+                        </div>
+                        <textarea id="edit-area" class="edit-area"></textarea>
+                        <div id="verse-ref" class="verse-ref"></div>
+                    </div>
+                </div>
+
+                <!-- Quick Note Card -->
+                <div class="bento-card">
+                    <div class="card-header">
+                        <span class="card-label">Быстрая Заметка</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 12px; flex: 1;">
+                        <textarea id="note-input" class="edit-area active"
+                            style="min-height: 80px; font-size:16px; padding:12px; display:block;"
+                            placeholder="Текст для экрана..."></textarea>
+
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn btn-primary" onclick="showNote()" style="flex:1;">
+                                📡 Показать
+                            </button>
+                            <button class="btn btn-secondary" onclick="hideOnDisplay()" title="Очистить экран">
+                                ⬛
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info/Control Card -->
+                <div class="bento-card">
+                    <div class="card-header">
+                        <span class="card-label">Управление</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 12px; flex: 1; justify-content: center;">
+                        <button class="btn btn-success" id="btn-broadcast" onclick="showOnDisplay()" disabled
+                            style="width: 100%;">
+                            📡 Транслировать Стих
+                        </button>
+                    </div>
+                    <div style="margin-top: auto; padding-top: 16px; font-size: 12px; color: var(--text-tertiary);">
+                        <strong>Горячие клавиши:</strong><br>
+                        Enter — поиск<br>
+                        Ctrl+Enter — стих в эфир<br>
+                        Esc — очистить экран
+                    </div>
+                </div>
+
+                <!-- Info Card -->
+                <div class="bento-card">
+                    <div class="card-header">
+                        <span class="card-label">Перевод</span>
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                        <div style="font-size: 32px; font-weight: 700; margin-bottom: 8px;" id="current-translation">RST
+                        </div>
+                        <div style="color: var(--text-tertiary); font-size: 13px;">Синодальный перевод</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Настройки экрана</h2>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Шрифт стихов</label>
+                    <select id="font-select" class="form-select" onchange="updateSettings()">
+                        <option value="'Playfair Display', serif">Playfair Display</option>
+                        <option value="'Inter', sans-serif">Inter</option>
+                        <option value="'Georgia', serif">Georgia</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Тема фона</label>
+                    <select id="theme-select" class="form-select" onchange="updateSettings()">
+                        <option value="blue">Глубокий Синий</option>
+                        <option value="black">Чёрный (OLED)</option>
+                        <option value="forest">Зелёный</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Размер текста</label>
+                    <input type="range" id="size-range" class="form-range" min="80" max="150" value="100"
+                        oninput="updateSettings()">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="toggleSettings()">Готово</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="loading-overlay">
+        <div class="loader"></div>
+        <div class="loading-text">Загрузка Библии...</div>
+    </div>
+
+    <script src="js/data/bible_data.js"></script>
+    <script src="js/data/nrt_data.js"></script>
+    <script src="js/data/ktb_data.js"></script>
+    <script src="js/common.js"></script>
+    <script>
+        // === INIT ===
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loading');
+            if (typeof BIBLE_DATA !== 'undefined' && typeof NRT_DATA !== 'undefined' && typeof KTB_DATA !== 'undefined') {
+                loader.style.display = 'none';
+            } else {
+                let missing = [];
+                if (typeof BIBLE_DATA === 'undefined') missing.push('RST');
+                if (typeof NRT_DATA === 'undefined') missing.push('NRT');
+                if (typeof KTB_DATA === 'undefined') missing.push('KTB');
+                loader.innerHTML = `<div style="color: var(--error);">Ошибка: не загружены ${missing.join(', ')}</div>`;
+            }
+
+            const saved = localStorage.getItem('bible_settings');
+            if (saved) {
+                const s = JSON.parse(saved);
+                document.getElementById('font-select').value = s.font;
+                document.getElementById('theme-select').value = s.theme;
+                document.getElementById('size-range').value = s.size;
+            }
+        });
+
+        // === DOM ===
+        const input = document.getElementById('search-input');
+        const status = document.getElementById('status');
+        const verseText = document.getElementById('verse-text');
+        const verseRef = document.getElementById('verse-ref');
+        const btnBroadcast = document.getElementById('btn-broadcast');
+        const historyList = document.getElementById('history');
+        const editArea = document.getElementById('edit-area');
+        const translationDisplay = document.getElementById('current-translation');
+        const noteInput = document.getElementById('note-input');
+
+        let currentVerse = null;
+        let history = [];
+        let displayWindow = null;
+
+        // === SEARCH ===
+        input.addEventListener('keydown', async (e) => {
+            if (e.key === 'Enter') {
+                const query = input.value.trim();
+                if (!query) return;
+
+                status.innerText = '⏳ Поиск...';
+                status.className = 'status-pill';
+
+                const parsed = parseQuery(query);
+                if (!parsed) {
+                    status.innerText = '❌ Ошибка запроса';
+                    status.className = 'status-pill error';
+                    return;
+                }
+
+                const translation = document.getElementById('translation-select').value;
+                const data = await fetchVerse(parsed, translation);
+
+                if (data) {
+                    // Check edits
+                    const edits = JSON.parse(localStorage.getItem('bible_edits') || '{}');
+                    const key = `${translation}_${data.bookName}_${data.chapter}_${data.verse}`;
+                    if (edits[key]) data.text = edits[key];
+
+                    currentVerse = data;
+                    renderPreview(data);
+
+                    status.innerText = `✓ ${data.reference}`;
+                    status.className = 'status-pill success';
+
+                    addToHistory(data);
+
+                    if (e.ctrlKey) showOnDisplay();
+                } else {
+                    status.innerText = '❌ Не найдено';
+                    status.className = 'status-pill error';
+                }
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') hideOnDisplay();
+            if (e.ctrlKey && e.key === 'Enter' && currentVerse) showOnDisplay();
+        });
+
+        // Update translation display and refresh verse
+        document.getElementById('translation-select').addEventListener('change', async (e) => {
+            const newTranslation = e.target.value;
+            translationDisplay.innerText = newTranslation;
+
+            // Если есть активный стих, перезагружаем его в новом переводе
+            if (currentVerse) {
+                // Используем текущую ссылку для пере-поиска (например "Ин 3:16")
+                const parsed = parseQuery(currentVerse.reference);
+
+                if (parsed) {
+                    status.innerText = '⏳ Обновление...';
+
+                    const data = await fetchVerse(parsed, newTranslation);
+
+                    if (data) {
+                        // Check for saved edits in the new translation
+                        const edits = JSON.parse(localStorage.getItem('bible_edits') || '{}');
+                        const key = `${newTranslation}_${data.bookName}_${data.chapter}_${data.verse}`;
+                        // Обратная совместимость для RST
+                        const legacyKey = `${data.bookName}_${data.chapter}_${data.verse}`;
+
+                        if (edits[key]) {
+                            data.text = edits[key];
+                        } else if (newTranslation === 'RST' && edits[legacyKey]) {
+                            data.text = edits[legacyKey];
+                        }
+
+                        currentVerse = data;
+                        renderPreview(data);
+
+                        status.innerText = `✓ ${data.reference} (${newTranslation})`;
+                        status.className = 'status-pill success';
+
+                        // Добавляем в историю как новый пункт, чтобы можно было вернуться
+                        addToHistory(data);
+
+                        // Если сейчас трансляция - обновляем и на экране
+                        if (displayWindow && !displayWindow.closed && document.getElementById('status').classList.contains('broadcasting')) {
+                            showOnDisplay();
+                        }
+                    } else {
+                        // Если в другом переводе стиха нет (редкий случай, но бывает)
+                        status.innerText = `⚠️ Нет в ${newTranslation}`;
+                        status.className = 'status-pill error';
+                    }
+                }
+            }
+        });
+
+        // === DISPLAY ===
+        function showOnDisplay() {
+            if (currentVerse && displayWindow && !displayWindow.closed) {
+                displayWindow.postMessage({ type: 'SHOW_VERSE', data: currentVerse }, '*');
+                status.innerText = `📡 ${currentVerse.reference}`;
+                status.className = 'status-pill broadcasting';
+            } else if (!displayWindow || displayWindow.closed) {
+                status.innerText = '⚠️ Откройте экран';
+                status.className = 'status-pill error';
+            }
+        }
+
+        function hideOnDisplay() {
+            if (displayWindow && !displayWindow.closed) {
+                displayWindow.postMessage({ type: 'HIDE_VERSE' }, '*');
+            }
+            status.innerText = '⏳ Готов';
+            status.className = 'status-pill';
+        }
+
+        async function openDisplayWindow() {
+            if ('getScreenDetails' in window) {
+                try {
+                    const details = await window.getScreenDetails();
+                    const ext = details.screens.find(s => s !== details.currentScreen) || details.screens[0];
+                    displayWindow = window.open('display.html', 'Display', `left=${ext.left},top=${ext.top},width=${ext.width},height=${ext.height}`);
+                    setTimeout(updateSettings, 1000);
+                    return;
+                } catch (e) { }
+            }
+            displayWindow = window.open('display.html', 'Display', 'width=1024,height=768');
+            setTimeout(updateSettings, 1000);
+        }
+
+        // === NOTES ===
+        function showNote() {
+            const text = noteInput.value.trim();
+            if (!text) return;
+
+            if (displayWindow && !displayWindow.closed) {
+                displayWindow.postMessage({ type: 'SHOW_NOTE', data: { text: text } }, '*');
+                status.innerText = `📡 ЗАМЕТКА`;
+                status.className = 'status-pill broadcasting';
+            } else {
+                status.innerText = '⚠️ Откройте экран';
+                status.className = 'status-pill error';
+            }
+        }
+
+        // === SETTINGS ===
+        function toggleSettings() {
+            document.getElementById('settings-modal').classList.toggle('active');
+        }
+
+        function updateSettings() {
+            const font = document.getElementById('font-select').value;
+            const theme = document.getElementById('theme-select').value;
+            const size = document.getElementById('size-range').value;
+            localStorage.setItem('bible_settings', JSON.stringify({ font, theme, size }));
+            if (displayWindow && !displayWindow.closed) {
+                displayWindow.postMessage({ type: 'UPDATE_SETTINGS', data: { font, theme, size } }, '*');
+            }
+        }
+
+        // === HISTORY ===
+        function addToHistory(data) {
+            if (history.length > 0 && history[0].reference === data.reference) return;
+            history.unshift(data);
+            if (history.length > 15) history.pop();
+            renderHistory();
+        }
+
+        function renderHistory() {
+            historyList.innerHTML = history.map((item, i) => `
+                <div class="history-item" onclick="loadFromHistory(${i})">
+                    <div class="history-ref">${item.reference}</div>
+                    <div class="history-snippet">${item.text.substring(0, 40)}...</div>
+                </div>
+            `).join('');
+        }
+
+        function loadFromHistory(i) {
+            currentVerse = history[i];
+            renderPreview(currentVerse);
+            showOnDisplay();
+        }
+
+        function clearHistory() {
+            history = [];
+            renderHistory();
+        }
+
+        // === EDIT ===
+        function toggleEditMode() {
+            if (!currentVerse) return;
+            verseText.style.display = 'none';
+            editArea.value = currentVerse.text;
+            editArea.classList.add('active');
+            document.getElementById('btn-edit').style.display = 'none';
+            document.getElementById('btn-save').style.display = 'inline-flex';
+            document.getElementById('btn-cancel').style.display = 'inline-flex';
+            editArea.focus();
+        }
+
+        function cancelEdit() {
+            verseText.style.display = 'block';
+            editArea.classList.remove('active');
+            document.getElementById('btn-edit').style.display = 'flex';
+            document.getElementById('btn-save').style.display = 'none';
+            document.getElementById('btn-cancel').style.display = 'none';
+        }
+
+        function saveEdit() {
+            if (!currentVerse) return;
+            currentVerse.text = editArea.value.trim();
+            const t = document.getElementById('translation-select').value;
+            const edits = JSON.parse(localStorage.getItem('bible_edits') || '{}');
+            edits[`${t}_${currentVerse.bookName}_${currentVerse.chapter}_${currentVerse.verse}`] = currentVerse.text;
+            localStorage.setItem('bible_edits', JSON.stringify(edits));
+            renderPreview(currentVerse);
+            cancelEdit();
+            if (status.classList.contains('broadcasting')) showOnDisplay();
+        }
+
+        function renderPreview(data) {
+            verseText.innerText = data.text;
+            verseText.classList.remove('placeholder');
+            verseRef.innerText = data.reference;
+            btnBroadcast.disabled = false;
+        }
+    </script>
+</body>
+
+</html>
