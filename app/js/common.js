@@ -91,6 +91,11 @@ function parseQuery(query) {
 
     let bookId = BIBLE_BOOKS[bookName];
 
+    // Если не нашли в русском списке, ищем в казахском (если загружен)
+    if (!bookId && typeof KTB_BOOK_MAP !== 'undefined') {
+        bookId = KTB_BOOK_MAP[bookName];
+    }
+
     if (!bookId) return null;
 
     return {
@@ -157,7 +162,10 @@ async function fetchVerse(parsed, translation = 'RST') {
 
             // Формируем красивую ссылку
             let refVertex = parsed.verse; // 1-5 или 1
-            const bookNameTitle = getBookTitle(parsed.bookId);
+            let bookNameTitle = getBookTitle(parsed.bookId);
+            if (book.BookName) {
+                bookNameTitle = book.BookName;
+            }
 
             return {
                 text: text,

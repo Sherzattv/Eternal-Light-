@@ -1,8 +1,8 @@
 import sqlite3
 import json
 
-db_path = "ktb_temp/KTB'22.SQLite3"
-output_file = 'ktb_data.js'
+db_path = "ktb_temp/KTB'22.SQLite3" # Will unpack here
+output_file = 'app/js/data/ktb_data.js'
 
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
@@ -17,7 +17,9 @@ books_rows = cursor.fetchall()
 
 # Mapping MyBible book_number -> App BookId (1..66)
 mybible_to_id = {}
+mybible_to_id = {}
 app_books = []
+search_map = {} # name -> id for search
 
 current_id = 1
 for row in books_rows:
@@ -36,8 +38,15 @@ for row in books_rows:
     
     app_books.append({
         "BookId": current_id,
+        "BookName": long, # Added Kazakh name
         "Chapters": {} # ChapterId -> { "ChapterId": ..., "Verses": [] }
     })
+    
+    # Add to search map (lowercase)
+    if short:
+        search_map[short.lower()] = current_id
+    if long:
+        search_map[long.lower()] = current_id
     
     current_id += 1
 
@@ -100,6 +109,11 @@ print(f"Writing to {output_file}...")
 with open(output_file, 'w', encoding='utf-8') as f:
     f.write("const KTB_DATA = ")
     json.dump(final_data, f, ensure_ascii=False, separators=(',', ':'))
+    f.write(";")
+    
+    # Write the search map variable
+    f.write("\nconst KTB_BOOK_MAP = ")
+    json.dump(search_map, f, ensure_ascii=False, separators=(',', ':'))
     f.write(";")
 
 conn.close()
