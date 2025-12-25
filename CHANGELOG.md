@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Redesigned bottom layout into a compact 3-column bento grid.
   - Moved broadcast controls to a dedicated "Эфир" (Live) panel.
 - **Notes Feature**: Ability to broadcast custom text notes to the display screen.
+- **PWA Support**: Progressive Web App with offline capability.
+  - Added `manifest.json` for installability.
+  - Added `sw.js` Service Worker for offline caching.
+  - App can be installed on desktop/mobile and works without internet.
 - **Git Integration**: Initialized Git repository and restructured project layout.
 
 ### Changed
