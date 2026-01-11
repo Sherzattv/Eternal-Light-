@@ -1,10 +1,21 @@
 {
     "name": "eternal-light",
-    "version": "1.2.0",
+    "version": "2.0.0",
     "description": "Bible Display System (PWA)",
     "main": "app/controller.html",
+    "type": "module",
     "scripts": {
-        "start": "open app/controller.html"
+        "start": "open app/controller.html",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "lint": "eslint app/js --ext .js",
+        "lint:fix": "eslint app/js --ext .js --fix"
+    },
+    "devDependencies": {
+        "vitest": "^2.0.0",
+        "jsdom": "^25.0.0",
+        "eslint": "^9.0.0",
+        "prettier": "^3.0.0"
     },
     "author": "Sherzat",
     "license": "MIT"

@@ -3,3 +3,4 @@ node_modules
 sources/*.zip
 ktb_temp/
 *.log
+node_modules
