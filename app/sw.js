@@ -1,72 +1,139 @@
 /**
  * Service Worker для PWA "Вечный Свет"
  * Обеспечивает оффлайн-доступ к приложению
+ * v3 - Updated for modular architecture
  */
 
-const CACHE_NAME = 'eternal-light-v2';
-const ASSETS_TO_CACHE = [
+const CACHE_NAME = 'eternal-light-v3';
+
+// Core app files (always cached)
+const CORE_ASSETS = [
     './',
     './controller.html',
     './display.html',
     './manifest.json',
-    './js/common.js',
-    './js/data/bible_data.js',
-    './js/data/nrt_data.js',
-    './js/data/ktb_data.js',
     './icons/icon-192.png',
-    './icons/icon-512.png'
+    './icons/icon-512.png',
+    // CSS
+    './css/variables.css',
+    './css/controller.css',
+    './css/display.css',
+    // Core JS
+    './js/app.js',
+    './js/common.js',
+    // Modules
+    './js/modules/search.js',
+    './js/modules/broadcast.js',
+    './js/modules/history.js',
+    './js/modules/settings.js',
+    './js/modules/dom-utils.js',
+    './js/modules/loader.js'
 ];
 
-// Установка: кешируем все ресурсы
+// Large data files (cached separately, can be loaded on demand)
+const DATA_ASSETS = [
+    './js/data/bible_data.js',
+    './js/data/nrt_data.js',
+    './js/data/ktb_data.js'
+];
+
+// All assets to cache on install
+const ASSETS_TO_CACHE = [...CORE_ASSETS, ...DATA_ASSETS];
+
+// Installation: cache all resources
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
-                console.log('[SW] Кеширование ресурсов...');
+                console.log('[SW v3] Кеширование ресурсов...');
                 return cache.addAll(ASSETS_TO_CACHE);
             })
-            .then(() => self.skipWaiting()) // Активировать сразу
+            .then(() => self.skipWaiting())
     );
 });
 
-// Активация: удаляем старые кеши
+// Activation: remove old caches
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cacheName) => {
                     if (cacheName !== CACHE_NAME) {
-                        console.log('[SW] Удаление старого кеша:', cacheName);
+                        console.log('[SW v3] Удаление старого кеша:', cacheName);
                         return caches.delete(cacheName);
                     }
                 })
             );
-        }).then(() => self.clients.claim()) // Взять контроль сразу
+        }).then(() => self.clients.claim())
     );
 });
 
-// Стратегия: сначала кеш, потом сеть (Cache First)
+// Fetch strategy: Cache First for static assets, Network First for API
 self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        caches.match(event.request)
-            .then((cachedResponse) => {
-                if (cachedResponse) {
-                    return cachedResponse;
-                }
-                return fetch(event.request).then((networkResponse) => {
-                    // Кешируем новые запросы (например, шрифты Google)
-                    if (event.request.method === 'GET' && networkResponse.status === 200) {
-                        const responseClone = networkResponse.clone();
-                        caches.open(CACHE_NAME).then((cache) => {
-                            cache.put(event.request, responseClone);
-                        });
-                    }
-                    return networkResponse;
-                });
-            })
-            .catch(() => {
-                // Если оффлайн и файла нет в кеше — ничего не делаем
-                console.log('[SW] Оффлайн, ресурс не найден:', event.request.url);
-            })
-    );
+    const url = new URL(event.request.url);
+
+    // Skip non-GET requests
+    if (event.request.method !== 'GET') {
+        return;
+    }
+
+    // For data files: Network-first (to get updates), fallback to cache
+    if (url.pathname.includes('/js/data/')) {
+        event.respondWith(networkFirstStrategy(event.request));
+        return;
+    }
+
+    // For everything else: Cache-first
+    event.respondWith(cacheFirstStrategy(event.request));
 });
+
+/**
+ * Cache-first strategy
+ */
+async function cacheFirstStrategy(request) {
+    try {
+        const cachedResponse = await caches.match(request);
+        if (cachedResponse) {
+            return cachedResponse;
+        }
+
+        const networkResponse = await fetch(request);
+
+        // Cache successful responses
+        if (networkResponse.status === 200) {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(request, networkResponse.clone());
+        }
+
+        return networkResponse;
+    } catch (error) {
+        console.log('[SW v3] Оффлайн, ресурс не найден:', request.url);
+        return new Response('Offline', { status: 503 });
+    }
+}
+
+/**
+ * Network-first strategy (for data that might be updated)
+ */
+async function networkFirstStrategy(request) {
+    try {
+        const networkResponse = await fetch(request);
+
+        // Cache successful responses
+        if (networkResponse.status === 200) {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(request, networkResponse.clone());
+        }
+
+        return networkResponse;
+    } catch (error) {
+        // Fallback to cache
+        const cachedResponse = await caches.match(request);
+        if (cachedResponse) {
+            return cachedResponse;
+        }
+
+        console.log('[SW v3] Оффлайн, данные не найдены:', request.url);
+        return new Response('Offline', { status: 503 });
+    }
+}
