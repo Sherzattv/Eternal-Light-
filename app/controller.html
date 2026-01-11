@@ -50,6 +50,16 @@
                     aria-label="Открыть экран проектора">
                     🖥️ Открыть экран
                 </button>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-ghost" onclick="exportEditsToFile()" style="flex: 1; font-size: 12px;"
+                        title="Экспорт правок">
+                        📤 Экспорт
+                    </button>
+                    <button class="btn btn-ghost" onclick="importEditsFromFile()" style="flex: 1; font-size: 12px;"
+                        title="Импорт правок">
+                        📥 Импорт
+                    </button>
+                </div>
             </div>
         </aside>
 
@@ -63,6 +73,10 @@
                         placeholder="Введите ссылку на стих (Ин 3:16, Быт 1:1-3...)" autocomplete="off"
                         aria-label="Поиск стиха">
                 </div>
+                <button class="btn btn-secondary" onclick="openTextSearch()" title="Поиск по тексту"
+                    aria-label="Открыть поиск по тексту">
+                    📖 Текст
+                </button>
                 <select id="translation-select" class="translation-select" aria-label="Выбор перевода">
                     <option value="RST">Синодальный</option>
                     <option value="NRT">НРП</option>
@@ -173,6 +187,34 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" onclick="toggleSettings()">Готово</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Text Search Modal -->
+    <div id="text-search-modal" class="modal-overlay" role="dialog" aria-modal="true"
+        aria-labelledby="text-search-title">
+        <div class="modal" style="width: 600px;">
+            <div class="modal-header">
+                <h2 id="text-search-title" class="modal-title">📖 Поиск по тексту</h2>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" id="text-search-input" class="search-input"
+                        placeholder="Введите слово или фразу для поиска..."
+                        style="padding-left: 16px; margin-bottom: 16px;" aria-label="Текст для поиска">
+                </div>
+                <div id="text-search-results" class="search-results" role="list" aria-label="Результаты поиска"
+                    style="max-height: 400px; overflow-y: auto;">
+                    <div class="search-results-placeholder"
+                        style="color: var(--text-tertiary); text-align: center; padding: 40px;">
+                        Введите текст и нажмите Enter
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <span id="text-search-count" style="color: var(--text-tertiary); margin-right: auto;"></span>
+                <button class="btn btn-secondary" onclick="closeTextSearch()">Закрыть</button>
             </div>
         </div>
     </div>

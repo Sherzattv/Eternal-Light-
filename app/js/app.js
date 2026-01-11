@@ -6,7 +6,7 @@
 import { parseQuery, fetchVerse, fullTextSearch } from './modules/search.js';
 import { showVerse, showNote, hideDisplay, updateDisplaySettings, openDisplayWindow, setDisplayWindow, isDisplayAvailable } from './modules/broadcast.js';
 import { addToHistory, renderHistory, getFromHistory, clearHistory as clearHistoryData } from './modules/history.js';
-import { loadSettings, saveSettings, getEdit, saveEdit } from './modules/settings.js';
+import { loadSettings, saveSettings, getEdit, saveEdit, exportEdits, importEdits } from './modules/settings.js';
 import { updateStatus } from './modules/dom-utils.js';
 
 // === STATE ===
@@ -325,6 +325,48 @@ window.clearHistory = function () {
     renderHistory(elements.historyList, loadFromHistory);
 };
 
+// === EXPORT / IMPORT EDITS ===
+
+window.exportEditsToFile = function () {
+    const data = exportEdits();
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `eternal-light-edits-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    updateStatus(elements.status, '✓ Экспорт завершён', 'success');
+};
+
+window.importEditsFromFile = function () {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const success = importEdits(event.target.result);
+            if (success) {
+                updateStatus(elements.status, '✓ Импорт завершён', 'success');
+            } else {
+                updateStatus(elements.status, '❌ Ошибка импорта', 'error');
+            }
+        };
+        reader.readAsText(file);
+    };
+
+    input.click();
+};
+
 // === REGISTER SERVICE WORKER ===
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')
@@ -349,6 +391,89 @@ window.hideFromDisplay = function () {
     hideDisplay();
     updateStatus(elements.status, '⏳ Готов');
 };
+
+// === TEXT SEARCH ===
+window.openTextSearch = function () {
+    const modal = document.getElementById('text-search-modal');
+    const input = document.getElementById('text-search-input');
+    modal.classList.add('active');
+    input.value = '';
+    input.focus();
+
+    // Setup search on Enter
+    input.onkeydown = (e) => {
+        if (e.key === 'Enter') {
+            performTextSearch();
+        }
+    };
+};
+
+window.closeTextSearch = function () {
+    const modal = document.getElementById('text-search-modal');
+    modal.classList.remove('active');
+};
+
+function performTextSearch() {
+    const query = document.getElementById('text-search-input').value.trim();
+    if (!query) return;
+
+    const translation = elements.translationSelect.value;
+    const db = getDatabases()[translation];
+
+    const results = fullTextSearch(query, db, 30);
+    renderSearchResults(results, query);
+}
+
+function renderSearchResults(results, query) {
+    const container = document.getElementById('text-search-results');
+    const countEl = document.getElementById('text-search-count');
+
+    // Clear previous results
+    container.innerHTML = '';
+    countEl.textContent = `Найдено: ${results.length}`;
+
+    if (results.length === 0) {
+        const placeholder = document.createElement('div');
+        placeholder.style.cssText = 'color: var(--text-tertiary); text-align: center; padding: 40px;';
+        placeholder.textContent = 'Ничего не найдено';
+        container.appendChild(placeholder);
+        return;
+    }
+
+    results.forEach((verse, index) => {
+        const item = document.createElement('div');
+        item.className = 'search-result-item';
+        item.dataset.index = index;
+
+        const refDiv = document.createElement('div');
+        refDiv.className = 'search-result-ref';
+        refDiv.textContent = verse.reference; // Safe: textContent
+
+        const textDiv = document.createElement('div');
+        textDiv.className = 'search-result-text';
+        textDiv.textContent = verse.text; // Safe: textContent
+
+        item.appendChild(refDiv);
+        item.appendChild(textDiv);
+        container.appendChild(item);
+    });
+
+    // Event delegation for clicks
+    container.onclick = (e) => {
+        const item = e.target.closest('.search-result-item');
+        if (item && item.dataset.index !== undefined) {
+            const verse = results[Number(item.dataset.index)];
+            if (verse) {
+                currentVerse = verse;
+                displayPreview(verse);
+                addToHistory(verse);
+                renderHistory(elements.historyList, loadFromHistory);
+                closeTextSearch();
+                updateStatus(elements.status, `✓ ${verse.reference}`, 'success');
+            }
+        }
+    };
+}
 
 // === START ===
 window.addEventListener('load', init);

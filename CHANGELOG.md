@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-01-11
+
+### Added
+- **Full-text Search**: Search across all verses by text content with modal UI.
+- **Export/Import Edits**: Backup and restore your verse edits as JSON files.
+- **Offline Fallback Page**: User-friendly offline.html when resources unavailable.
+- **Unit Tests**: 34 tests with Vitest covering search and history modules.
+- **ESLint + Prettier**: Code quality tooling configured.
+
+### Changed
+- **Modular Architecture**: Refactored to ES6 modules:
+  - `search.js` - parsing and verse lookup
+  - `broadcast.js` - cross-window communication
+  - `history.js` - XSS-safe history management
+  - `settings.js` - settings and edits persistence
+  - `dom-utils.js` - safe DOM manipulation
+  - `loader.js` - lazy loading support
+- **External CSS/JS**: Moved inline styles/scripts to separate files.
+- **Service Worker v3**: Updated caching for modular architecture.
+- **Loading UI**: Added progress bar with status text.
+- **PWA Icons**: New professionally designed icons (192px, 512px).
+
+### Security
+- **XSS Fix**: Replaced innerHTML with textContent in history rendering.
+- **Safe DOM Utils**: All user content rendered via textContent.
+
+### Developer Experience
+- **Testing**: `npm test` runs Vitest with jsdom.
+- **Linting**: `npm run lint` for ESLint checks.
+- **Version**: Updated to 2.0.0.
+
 ## [1.2.0] - 2025-12-25
 
 ### Added
