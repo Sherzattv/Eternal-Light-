@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Экран Трансляции - Вечный Свет</title>
 
+    <!-- Font Preload for performance -->
+    <link rel="preload"
+        href="https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvUDQZNLo_U2r.woff2"
+        as="font" type="font/woff2" crossorigin>
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,100 +32,8 @@
 
     <div id="idle" class="idle-message">Ожидание стиха...</div>
 
-    <script>
-        // BroadcastChannel for receiving messages from controller
-        const channel = new BroadcastChannel('bible_display');
-
-        const container = document.getElementById('display-container');
-        const content = document.getElementById('verse-content');
-        const ref = document.getElementById('verse-ref');
-        const idle = document.getElementById('idle');
-
-        // Listen to BroadcastChannel
-        channel.onmessage = (event) => handleMessage(event.data);
-
-        // Listen to postMessage from parent window (popup)
-        window.addEventListener('message', (event) => {
-            handleMessage(event.data);
-        });
-
-        function handleMessage(payload) {
-            const { type, data } = payload;
-
-            if (type === 'SHOW_VERSE') {
-                updateDisplay(data);
-            } else if (type === 'SHOW_NOTE') {
-                updateDisplay(data, true);
-            } else if (type === 'HIDE_VERSE') {
-                hideDisplay();
-            } else if (type === 'UPDATE_SETTINGS') {
-                applySettings(data);
-            }
-        }
-
-        // Load saved settings on startup
-        window.addEventListener('load', () => {
-            try {
-                const saved = localStorage.getItem('bible_settings');
-                if (saved) applySettings(JSON.parse(saved));
-            } catch (e) { }
-        });
-
-        function applySettings(s) {
-            document.documentElement.style.setProperty('--font-main', s.font);
-            document.documentElement.style.setProperty('--font-scale', s.size / 100);
-
-            const bgElement = document.querySelector('.background-overlay');
-            if (s.theme === 'blue') {
-                bgElement.style.background = 'radial-gradient(circle at center, #1e293b 0%, #0f172a 100%)';
-                document.documentElement.style.setProperty('--accent-color', '#d4af37');
-            } else if (s.theme === 'black') {
-                bgElement.style.background = '#000000';
-                document.documentElement.style.setProperty('--accent-color', '#ffffff');
-            } else if (s.theme === 'forest') {
-                bgElement.style.background = 'radial-gradient(circle at center, #14532d 0%, #052e16 100%)';
-                document.documentElement.style.setProperty('--accent-color', '#86efac');
-            }
-        }
-
-        function updateDisplay(data, isNote = false) {
-            container.classList.remove('visible');
-
-            setTimeout(() => {
-                content.textContent = data.text; // Safe: textContent
-
-                if (isNote) {
-                    ref.style.display = 'none';
-                    content.style.fontSize = '4vw';
-                } else {
-                    ref.style.display = 'block';
-                    ref.textContent = data.reference; // Safe: textContent
-                }
-
-                if (!isNote) {
-                    // Auto-size based on text length
-                    const length = data.text.length;
-                    if (length > 300) {
-                        content.style.fontSize = '3vw';
-                    } else if (length > 150) {
-                        content.style.fontSize = '4vw';
-                    } else {
-                        content.style.fontSize = '5vw';
-                    }
-                }
-
-                idle.style.display = 'none';
-                container.classList.add('visible');
-            }, 400);
-        }
-
-        function hideDisplay() {
-            container.classList.remove('visible');
-            setTimeout(() => {
-                idle.style.display = 'block';
-            }, 800);
-        }
-    </script>
+    <!-- Display module -->
+    <script type="module" src="js/display.js"></script>
 </body>
 
 </html>

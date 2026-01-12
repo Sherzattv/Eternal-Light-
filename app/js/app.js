@@ -115,6 +115,35 @@ function setupEventListeners() {
     elements.fontSelect.addEventListener('change', handleSettingsUpdate);
     elements.themeSelect.addEventListener('change', handleSettingsUpdate);
     elements.sizeRange.addEventListener('input', handleSettingsUpdate);
+
+    // Mobile menu toggle
+    setupMobileMenu();
+}
+
+// === MOBILE MENU ===
+function setupMobileMenu() {
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    if (!menuToggle || !sidebar || !overlay) return;
+
+    const toggleMenu = () => {
+        const isOpen = sidebar.classList.toggle('open');
+        overlay.classList.toggle('active', isOpen);
+        menuToggle.setAttribute('aria-expanded', isOpen);
+        menuToggle.textContent = isOpen ? '✕' : '☰';
+    };
+
+    menuToggle.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+            toggleMenu();
+        }
+    });
 }
 
 // === SEARCH HANDLER ===

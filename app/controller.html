@@ -10,6 +10,11 @@
     <link rel="apple-touch-icon" href="icons/icon-192.png">
     <title>Вечный Свет</title>
 
+    <!-- Font Preload for performance -->
+    <link rel="preload"
+        href="https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hjp-Ek-_EeA.woff2"
+        as="font" type="font/woff2" crossorigin>
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,6 +26,10 @@
 
 <body>
     <div class="app">
+        <!-- Mobile Menu Toggle -->
+        <button id="menu-toggle" class="btn-icon menu-toggle" aria-label="Открыть меню" aria-expanded="false">☰</button>
+        <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
         <!-- Sidebar -->
         <aside class="sidebar" role="complementary" aria-label="История и настройки">
             <div class="sidebar-header">

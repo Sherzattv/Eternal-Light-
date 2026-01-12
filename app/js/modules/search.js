@@ -101,8 +101,7 @@ export function fetchVerse(parsed, db, translation = 'RST') {
         if (versesList.length > 0) {
             const text = versesList.map(v => v.Text).join(' ');
 
-            // CRITICAL: Always use canonical title - data files have corrupted BookName!
-            // RST bible_data.js has wrong BookName (ID45='Иакова' instead of 'Римлянам')
+            // Use canonical title for consistency
             const lang = translation === 'KTB' ? 'kz' : 'ru';
             const bookTitle = getBookTitle(parsed.canonicalCode, lang);
 
@@ -173,7 +172,7 @@ export function fullTextSearch(query, db, translation = 'RST', limit = 20) {
             for (const verse of chapter.Verses) {
                 if (verse.Text.toLowerCase().includes(searchTerm)) {
                     const canonicalCode = idToCode[book.BookId];
-                    // Always use canonical title - data files have corrupted BookName
+                    // Use canonical title for consistency
                     const bookTitle = getBookTitle(canonicalCode, lang);
 
                     results.push({

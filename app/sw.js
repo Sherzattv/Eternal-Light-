@@ -1,10 +1,10 @@
 /**
  * Service Worker для PWA "Вечный Свет"
  * Обеспечивает оффлайн-доступ к приложению
- * v3 - Updated for modular architecture
+ * v4 - Added display.js module
  */
 
-const CACHE_NAME = 'eternal-light-v6';
+const CACHE_NAME = 'eternal-light-v7';
 
 // Core app files (always cached)
 const CORE_ASSETS = [
@@ -21,6 +21,7 @@ const CORE_ASSETS = [
     // Core JS
     './js/app.js',
     './js/common.js',
+    './js/display.js',  // Display window module
     // Modules
     './js/modules/canonical.js',  // NEW: Canonical book codes
     './js/modules/search.js',
