@@ -4,7 +4,7 @@
  * v3 - Updated for modular architecture
  */
 
-const CACHE_NAME = 'eternal-light-v3';
+const CACHE_NAME = 'eternal-light-v6';
 
 // Core app files (always cached)
 const CORE_ASSETS = [
@@ -22,6 +22,7 @@ const CORE_ASSETS = [
     './js/app.js',
     './js/common.js',
     // Modules
+    './js/modules/canonical.js',  // NEW: Canonical book codes
     './js/modules/search.js',
     './js/modules/broadcast.js',
     './js/modules/history.js',

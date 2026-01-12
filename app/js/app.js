@@ -130,13 +130,13 @@ async function handleSearch(e) {
     const db = getDatabases()[translation];
     const ktbMap = translation === 'KTB' ? getKtbBookMap() : null;
 
-    const parsed = parseQuery(query, ktbMap);
+    const parsed = parseQuery(query);
     if (!parsed) {
         updateStatus(elements.status, '❌ Ошибка запроса', 'error');
         return;
     }
 
-    const data = fetchVerse(parsed, db);
+    const data = fetchVerse(parsed, db, translation);
 
     if (data) {
         // Check for saved edits
@@ -181,13 +181,13 @@ async function handleTranslationChange(e) {
     updateStatus(elements.status, '⏳ Обновление...');
 
     const parsed = {
-        bookId: currentVerse.bookId,
+        canonicalCode: currentVerse.canonicalCode,
         chapter: currentVerse.chapter,
         verse: currentVerse.verse,
         bookName: currentVerse.bookName
     };
 
-    const data = fetchVerse(parsed, db);
+    const data = fetchVerse(parsed, db, newTranslation);
 
     if (data) {
         const editedText = getEdit(newTranslation, data.bookName, data.chapter, data.verse);
@@ -420,7 +420,7 @@ function performTextSearch() {
     const translation = elements.translationSelect.value;
     const db = getDatabases()[translation];
 
-    const results = fullTextSearch(query, db, 30);
+    const results = fullTextSearch(query, db, translation, 30);
     renderSearchResults(results, query);
 }
 
