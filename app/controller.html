@@ -139,6 +139,22 @@
                             📡 Стих в Эфир
                         </button>
 
+                        <!-- Navigation buttons -->
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-secondary" onclick="goToPrevVerse()"
+                                style="flex: 1; padding: 10px 16px; display: flex; align-items: center; justify-content: center; gap: 6px;"
+                                title="Предыдущий стих (↑)" aria-label="Предыдущий стих">
+                                <span style="font-size: 12px;">◀</span>
+                                <span>Пред</span>
+                            </button>
+                            <button class="btn btn-secondary" onclick="goToNextVerse()"
+                                style="flex: 1; padding: 10px 16px; display: flex; align-items: center; justify-content: center; gap: 6px;"
+                                title="Следующий стих (↓)" aria-label="Следующий стих">
+                                <span>След</span>
+                                <span style="font-size: 12px;">▶</span>
+                            </button>
+                        </div>
+
                         <button class="btn btn-secondary" onclick="hideFromDisplay()" title="Очистить экран"
                             style="width: 100%; color: var(--text-tertiary); border-style: dashed;"
                             aria-label="Скрыть с экрана">
@@ -148,7 +164,7 @@
 
                     <div
                         style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--glass-border); font-size: 11px; color: var(--text-tertiary); text-align: center;">
-                        Ctrl+Enter = Эфир
+                        ↑↓ = Навигация • Ctrl+Enter = Эфир
                     </div>
                 </div>
 

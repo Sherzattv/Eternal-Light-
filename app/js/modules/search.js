@@ -196,6 +196,191 @@ export function fullTextSearch(query, db, translation = 'RST', limit = 20) {
 }
 
 // ============================================================
+// VERSE NAVIGATION
+// ============================================================
+
+/**
+ * Get the next verse from current position
+ * @param {Object} current - Current verse data with bookId, chapter, verse
+ * @param {Object} db - Bible database
+ * @param {string} translation - Translation code
+ * @returns {Object|null} Next verse data or null if at end
+ */
+export function getNextVerse(current, db, translation = 'RST') {
+    if (!db || !db.Books || !current) return null;
+
+    const book = db.Books.find(b => b.BookId === current.bookId);
+    if (!book) return null;
+
+    const chapter = book.Chapters.find(c => c.ChapterId === parseInt(current.chapter));
+    if (!chapter) return null;
+
+    const currentVerseId = parseInt(current.verse.toString().split('-')[0]);
+    const lang = translation === 'KTB' ? 'kz' : 'ru';
+
+    // Try next verse in same chapter
+    const nextVerse = chapter.Verses.find(v => v.VerseId === currentVerseId + 1);
+    if (nextVerse) {
+        const bookTitle = getBookTitle(current.canonicalCode, lang);
+        return {
+            text: nextVerse.Text,
+            reference: `${bookTitle} ${chapter.ChapterId}:${nextVerse.VerseId}`,
+            bookName: bookTitle,
+            chapter: chapter.ChapterId,
+            verse: nextVerse.VerseId,
+            canonicalCode: current.canonicalCode,
+            bookId: current.bookId,
+            translation: translation
+        };
+    }
+
+    // Try first verse of next chapter
+    const nextChapter = book.Chapters.find(c => c.ChapterId === parseInt(current.chapter) + 1);
+    if (nextChapter && nextChapter.Verses.length > 0) {
+        const firstVerse = nextChapter.Verses[0];
+        const bookTitle = getBookTitle(current.canonicalCode, lang);
+        return {
+            text: firstVerse.Text,
+            reference: `${bookTitle} ${nextChapter.ChapterId}:${firstVerse.VerseId}`,
+            bookName: bookTitle,
+            chapter: nextChapter.ChapterId,
+            verse: firstVerse.VerseId,
+            canonicalCode: current.canonicalCode,
+            bookId: current.bookId,
+            translation: translation
+        };
+    }
+
+    // At end of book - try first verse of next book
+    const bookIndex = db.Books.findIndex(b => b.BookId === current.bookId);
+    if (bookIndex < db.Books.length - 1) {
+        const nextBook = db.Books[bookIndex + 1];
+        if (nextBook.Chapters.length > 0 && nextBook.Chapters[0].Verses.length > 0) {
+            const firstChapter = nextBook.Chapters[0];
+            const firstVerse = firstChapter.Verses[0];
+
+            // Build reverse map to find canonical code
+            const idToCode = {};
+            const map = TRANSLATION_MAPS[translation];
+            if (map) {
+                for (const [code, id] of Object.entries(map)) {
+                    idToCode[id] = code;
+                }
+            }
+            const newCanonicalCode = idToCode[nextBook.BookId];
+            const bookTitle = getBookTitle(newCanonicalCode, lang);
+
+            return {
+                text: firstVerse.Text,
+                reference: `${bookTitle} ${firstChapter.ChapterId}:${firstVerse.VerseId}`,
+                bookName: bookTitle,
+                chapter: firstChapter.ChapterId,
+                verse: firstVerse.VerseId,
+                canonicalCode: newCanonicalCode,
+                bookId: nextBook.BookId,
+                translation: translation
+            };
+        }
+    }
+
+    return null; // At the very end of the Bible
+}
+
+/**
+ * Get the previous verse from current position
+ * @param {Object} current - Current verse data with bookId, chapter, verse
+ * @param {Object} db - Bible database
+ * @param {string} translation - Translation code
+ * @returns {Object|null} Previous verse data or null if at beginning
+ */
+export function getPrevVerse(current, db, translation = 'RST') {
+    if (!db || !db.Books || !current) return null;
+
+    const book = db.Books.find(b => b.BookId === current.bookId);
+    if (!book) return null;
+
+    const chapter = book.Chapters.find(c => c.ChapterId === parseInt(current.chapter));
+    if (!chapter) return null;
+
+    const currentVerseId = parseInt(current.verse.toString().split('-')[0]);
+    const lang = translation === 'KTB' ? 'kz' : 'ru';
+
+    // Try previous verse in same chapter
+    if (currentVerseId > 1) {
+        const prevVerse = chapter.Verses.find(v => v.VerseId === currentVerseId - 1);
+        if (prevVerse) {
+            const bookTitle = getBookTitle(current.canonicalCode, lang);
+            return {
+                text: prevVerse.Text,
+                reference: `${bookTitle} ${chapter.ChapterId}:${prevVerse.VerseId}`,
+                bookName: bookTitle,
+                chapter: chapter.ChapterId,
+                verse: prevVerse.VerseId,
+                canonicalCode: current.canonicalCode,
+                bookId: current.bookId,
+                translation: translation
+            };
+        }
+    }
+
+    // Try last verse of previous chapter
+    const chapterIndex = book.Chapters.findIndex(c => c.ChapterId === parseInt(current.chapter));
+    if (chapterIndex > 0) {
+        const prevChapter = book.Chapters[chapterIndex - 1];
+        if (prevChapter.Verses.length > 0) {
+            const lastVerse = prevChapter.Verses[prevChapter.Verses.length - 1];
+            const bookTitle = getBookTitle(current.canonicalCode, lang);
+            return {
+                text: lastVerse.Text,
+                reference: `${bookTitle} ${prevChapter.ChapterId}:${lastVerse.VerseId}`,
+                bookName: bookTitle,
+                chapter: prevChapter.ChapterId,
+                verse: lastVerse.VerseId,
+                canonicalCode: current.canonicalCode,
+                bookId: current.bookId,
+                translation: translation
+            };
+        }
+    }
+
+    // At start of book - try last verse of previous book
+    const bookIndex = db.Books.findIndex(b => b.BookId === current.bookId);
+    if (bookIndex > 0) {
+        const prevBook = db.Books[bookIndex - 1];
+        if (prevBook.Chapters.length > 0) {
+            const lastChapter = prevBook.Chapters[prevBook.Chapters.length - 1];
+            if (lastChapter.Verses.length > 0) {
+                const lastVerse = lastChapter.Verses[lastChapter.Verses.length - 1];
+
+                // Build reverse map to find canonical code
+                const idToCode = {};
+                const map = TRANSLATION_MAPS[translation];
+                if (map) {
+                    for (const [code, id] of Object.entries(map)) {
+                        idToCode[id] = code;
+                    }
+                }
+                const newCanonicalCode = idToCode[prevBook.BookId];
+                const bookTitle = getBookTitle(newCanonicalCode, lang);
+
+                return {
+                    text: lastVerse.Text,
+                    reference: `${bookTitle} ${lastChapter.ChapterId}:${lastVerse.VerseId}`,
+                    bookName: bookTitle,
+                    chapter: lastChapter.ChapterId,
+                    verse: lastVerse.VerseId,
+                    canonicalCode: newCanonicalCode,
+                    bookId: prevBook.BookId,
+                    translation: translation
+                };
+            }
+        }
+    }
+
+    return null; // At the very beginning of the Bible
+}
+
+// ============================================================
 // BACKWARDS COMPATIBILITY
 // ============================================================
 

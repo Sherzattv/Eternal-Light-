@@ -3,7 +3,7 @@
  * Integrates all modules for the Eternal Light controller interface
  */
 
-import { parseQuery, fetchVerse, fullTextSearch } from './modules/search.js';
+import { parseQuery, fetchVerse, fullTextSearch, getNextVerse, getPrevVerse } from './modules/search.js';
 import { showVerse, showNote, hideDisplay, updateDisplaySettings, openDisplayWindow, setDisplayWindow, isDisplayAvailable } from './modules/broadcast.js';
 import { addToHistory, renderHistory, getFromHistory, clearHistory as clearHistoryData } from './modules/history.js';
 import { loadSettings, saveSettings, getEdit, saveEdit } from './modules/settings.js';
@@ -193,11 +193,26 @@ async function handleSearch(e) {
 
 // === GLOBAL KEYBOARD SHORTCUTS ===
 function handleGlobalKeys(e) {
+    // Don't trigger if user is typing in an input
+    const activeTag = document.activeElement?.tagName;
+    const isTyping = activeTag === 'INPUT' || activeTag === 'TEXTAREA';
+
     if (e.key === 'Escape') {
         hideFromDisplay();
     }
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && currentVerse) {
         broadcastToDisplay();
+    }
+    // Arrow navigation (only when not typing)
+    if (!isTyping && currentVerse) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+            e.preventDefault();
+            goToNextVerse();
+        }
+        if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+            e.preventDefault();
+            goToPrevVerse();
+        }
     }
 }
 
@@ -273,6 +288,69 @@ function loadFromHistory(index) {
         broadcastToDisplay();
     }
 }
+
+// === VERSE NAVIGATION ===
+function goToNextVerse() {
+    if (!currentVerse) return;
+
+    const translation = elements.translationSelect.value;
+    const db = getDatabases()[translation];
+
+    const nextVerse = getNextVerse(currentVerse, db, translation);
+    if (nextVerse) {
+        // Check for saved edits
+        const editedText = getEdit(translation, nextVerse.bookName, nextVerse.chapter, nextVerse.verse);
+        if (editedText) {
+            nextVerse.text = editedText;
+        }
+
+        currentVerse = nextVerse;
+        displayPreview(nextVerse);
+        addToHistory(nextVerse);
+        renderHistory(elements.historyList, loadFromHistory);
+        updateStatus(elements.status, `✓ ${nextVerse.reference}`, 'success');
+
+        // Auto-broadcast if we were already broadcasting
+        if (isDisplayAvailable()) {
+            broadcastToDisplay();
+        }
+    } else {
+        updateStatus(elements.status, '⚠️ Конец', 'error');
+    }
+}
+
+function goToPrevVerse() {
+    if (!currentVerse) return;
+
+    const translation = elements.translationSelect.value;
+    const db = getDatabases()[translation];
+
+    const prevVerse = getPrevVerse(currentVerse, db, translation);
+    if (prevVerse) {
+        // Check for saved edits
+        const editedText = getEdit(translation, prevVerse.bookName, prevVerse.chapter, prevVerse.verse);
+        if (editedText) {
+            prevVerse.text = editedText;
+        }
+
+        currentVerse = prevVerse;
+        displayPreview(prevVerse);
+        addToHistory(prevVerse);
+        renderHistory(elements.historyList, loadFromHistory);
+        updateStatus(elements.status, `✓ ${prevVerse.reference}`, 'success');
+
+        // Auto-broadcast if we were already broadcasting
+        if (isDisplayAvailable()) {
+            broadcastToDisplay();
+        }
+    } else {
+        updateStatus(elements.status, '⚠️ Начало', 'error');
+    }
+}
+
+// Global bindings for HTML onclick
+window.goToNextVerse = goToNextVerse;
+window.goToPrevVerse = goToPrevVerse;
 
 // === NOTES ===
 window.showNote = function () {
